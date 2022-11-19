@@ -1,0 +1,19 @@
+{
+  "name": "study-05",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "play": "node ./src/functional-playground/play.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "babel": "babel simple.js --preset babel-preset-es2017 --out-file compiled.js",
+    "build": "babel src -d babel"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/cli": "^7.18.9",
+    "@babel/core": "^7.18.9",
+    "@babel/preset-env": "^7.18.9"
+  }
+}
