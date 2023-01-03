@@ -1,0 +1,75 @@
+@startuml mydata01
+
+scale 1
+title 통합인증-사설인증서
+hide footbox
+actor "고객(CUSTOMER)" as customer
+participant "APP/WEB" as app
+participant "사설인증앱" as app2
+participant "WAS(API)" as was
+participant "제공기관시스템(OTHER)" as other
+
+customer -> app : 마이데이터 연동 메뉴이동
+app -> was : 공급기업목록조회
+customer -> app : 정보제공자선택
+app -> was : 권한범위설명조회
+customer -> app : 자산목록전송요구동의
+|||
+group 1차인증  
+  app -> was : 사설인증전자서명요청    
+  was -> other: 통합인증-102 요청
+  other --> was: 통합인증-102 응답    
+  was --> app: 사설인증전자서명요청 응답(앱스킴, 트랜잭션ID)
+  app -> app2: 사설인증 APP 호출
+  app2 -> other: 전자서명대상정보 조회
+  customer -> app2: 전자서명 앱 진입
+  note right: 네이버, 신한쏠 등
+  app2 -> app2: 전자서명 진행 
+  app2 -> app: 자사 APP 호출
+  app -> was: 사설인증정보전송
+  was -> other: 통합인증 103 요청
+  other --> was: 통합인증 103 응답(접근토큰)
+  loop 기관수만큼
+    was -> other: 통합인증 002 요청
+    other --> was: 통합인증 002 응답(접근토큰)
+    was -> other: 공통-002 요청
+    other --> was: 공통-002 응답(전송요구내역)
+  end
+  was --> app:  완료응답
+end
+
+app -> was: 전송요구자산목록조회 요청(옵셔널?)
+  loop 기관수만큼
+    was -> other: 업권별-001 요청
+    other -> was: 업권별-001 응답(자산목록)
+  end
+app -> was: 전송요구자산목록조회 응답(자산목록)
+
+customer -> app: 자산선택 완료
+app -> was: 권한범위설명 조회
+customer -> app: 수집/이용동의(상세항목)
+app -> was: 개인신용정보수집동의 및 약관동의 등록
+customer -> app: 전송요구권행사 요청
+
+app -> was: 넌스값생성 요청
+was --> app:  넌스값생성 응답
+
+group 2차인증
+  app -> app: 전자서명 진행(서명 해쉬값 응답)
+  note right: 공동인증서
+  app -> was : 전송요구자산상세전송 요청
+    loop 기관수만큼
+      was -> other: 통합인증-002 요청
+      other --> was: 통합인증-002 응답(접근토큰 발행)
+      was -> other: 공통-002 요청
+      other --> was: 공통-002 응답(전송요구내역)
+    end
+  was --> app : 전송요구자산상세전송 응답
+end
+
+app --> customer: 전송요구권행사 완료
+
+|||
+|||
+
+@enduml

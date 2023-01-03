@@ -1,0 +1,66 @@
+@startuml mydata01
+
+scale 1
+title 통합인증-공동인증서
+hide footbox
+actor "고객(CUSTOMER)" as customer
+participant "APP/WEB" as app
+participant "WAS(API)" as was
+participant "제공기관시스템(OTHER)" as other
+
+customer -> app : 마이데이터 연동 메뉴이동
+app -> was : 공급기업목록조회
+customer -> app : 정보제공자선택
+app -> was : 권한범위설명조회
+customer -> app : 자산목록전송요구동의
+|||
+group 1차인증
+  app -> was: 넌스값생성 요청
+  was --> app:  넌스값생성 응답
+  app -> app: 전자서명 진행(서명 해쉬값 응답)
+  note right: 공동인증서
+  app -> was : 본인인증정보전송 요청
+    loop 기관수만큼
+      was -> other: 통합인증-002 요청
+      other --> was: 통합인증-002 응답(접근토큰 발행)
+      was -> other: 공통-002 요청
+      other --> was: 공통-002 응답(전송요구내역)
+    end
+  was --> app : 본인인증정보전송 응답
+end
+
+app -> was: 전송요구자산목록조회 요청(옵셔널?)
+  loop 기관수만큼
+    was -> other: 업권별-001 요청
+    other -> was: 업권별-001 응답(자산목록)
+  end
+was --> app: 전송요구자산목록조회 응답(자산목록)
+|||
+|||
+customer -> app: 자산선택 완료
+app -> was: 권한범위설명 조회
+customer -> app: 수집/이용동의(상세항목)
+app -> was: 개인신용정보수집동의 및 약관동의 등록 요청
+was --> app: 개인신용정보수집동의 및 약관동의 등록 완료
+customer -> app: 전송요구권행사 요청
+|||
+group 2차인증
+  app -> was: 넌스값생성 요청
+  was --> app:  넌스값생성 응답
+  app -> app: 전자서명 진행(서명 해쉬값 응답)
+  note right: 공동인증서
+  app -> was : 전송요구자산상세전송 요청
+    loop 기관수만큼
+      was -> other: 통합인증-002 요청
+      other --> was: 통합인증-002 응답(접근토큰 발행)
+      was -> other: 공통-002 요청
+      other --> was: 공통-002 응답(전송요구내역)
+    end
+  was --> app : 전송요구자산상세전송 응답
+end
+
+app --> customer: 전송요구권행사 완료
+
+
+
+@enduml

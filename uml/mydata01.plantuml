@@ -1,0 +1,37 @@
+@startuml mydata01
+
+scale 1
+title 개별인증
+hide footbox
+actor "고객(CUSTOMER)" as customer
+participant "APP/WEB" as app
+participant "WAS(API)" as was
+participant "제공기관시스템(OTHER)" as other
+
+customer -> app : 마이데이터 연동 메뉴이동
+app -> was : 공급기업목록조회
+customer -> app : 정보제공자선택
+app -> was : 권한범위설명조회
+customer -> app : 수집/이용동의(상세화면)
+app -> was : 개인신용정보수집동의
+app -> was : 인가코드발급요청
+was -> other : 개별인증-001
+other --> was : 인증URL(HTTP응답코드:302)
+was --> app : 인증URL
+app -> other : 인증URL 접속(webwivew 주소이동)
+|||
+|||
+customer -> other : 인증 및 전송요구권 행사
+other --> app : 개별인증-001 회신(RedirectURL:인가코드포함)(HTTP응답코드:302)
+app -> app : RedirectURL 호출 및 이동
+group 개별연동처리
+  app -> was : 계정연결처리 요청
+  was -> other : 개별인증-002
+  other --> was : 개별인증-002 응답(접근토큰)
+  was -> other : 공통-002
+  other --> was : 공통-002 응답(전송요구내역)
+  was -> was : 연동완료 및 수집처리
+  was --> app : 계정연결처리 완료 
+end group
+
+@enduml
