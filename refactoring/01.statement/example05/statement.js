@@ -27,7 +27,7 @@ const invoices = [
 ]
 
 function statement(invoice, plays) {
-  return renderHtml(createStatementData(invoice, plays))
+  return renderPlainText(createStatementData(invoice, plays))
 } 
 
 function renderPlainText(data) {
@@ -41,6 +41,10 @@ function renderPlainText(data) {
   result += `적립 포인트: ${data.totalVolumeCredits}점\n`
   return result    
 }
+
+function htmlStatement(invoice, plays) {
+  return renderHtml(createStatementData(invoice, plays))
+} 
 
 function renderHtml(data) {
   let result = `<h1>청구 내역 (고객명: ${data.customer})</h1>\n`
